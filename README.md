@@ -19,3 +19,6 @@ sgarg2@andrew.cmu.edu
   
 Zachary C. Lipton<sup>1</sup>
 zlipton@cmu.edu
+
+\*: Denotes equal contribution
+1: Machine Learning Department, Carnegie Mellon University
