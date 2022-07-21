@@ -1,0 +1,90 @@
+# Indicate the preferred GPU for experiments, or -1 for no GPU.
+gpu: 4
+
+datasets:
+  cifar10:
+    # Variants of CIFAR do not require you to download the zip yourself, just indicate a new root and they will automatically download
+    root_path: '~/cifar10/'
+  cifar20:
+    root_path: '~/cifar100/'
+  imagenet:
+    # ImageNet50 must be downloaded on your own. Please indicate the root directory of the dataset.
+    root_path: '~/imagenet/'
+  fg2: 
+    # FieldGuide2 must be installed on your own. Please indicate the root directory of the dataset.
+    root_path: '~/fieldguide2/'
+  fg28: 
+    # FieldGuide28 must be installed on your own. Please indicate the root directory of the dataset.
+    root_path: '~/fieldguide28/'
+
+# List of all experiments to conduct. If an experiment is commented out, it will not be conducted.
+# Note: this is not an exhaustive list of the experiments conducted in our paper.
+# Instead, this is designed to be a template for conducting a user's own experiments by modifying the following list.
+experiments:
+- dataset_settings:
+    dataset: 'cifar10'
+    dataset_split_seed: 7636
+  class_prior_generation:
+    # domains must be at least the number of classes
+    domains: 10
+    # alpha must be positive
+    alpha: 0.5
+    # max cond must be positive. If it is too small, it is unlikely that a valid matrix could be generated.
+    max_condition_number: 4
+    class_prior_seed: 4
+  approaches:
+  # options: ['ddfa', 'ddfa_scan']. If DDFA_SCAN is selected, the SCAN baseline will also be computed.
+  - 'ddfa'
+  - 'ddfa_scan'
+- dataset_settings:
+    dataset: 'cifar10'
+    dataset_split_seed: 7636
+  class_prior_generation:
+    # domains must be at least the number of classes
+    domains: 15
+    # alpha must be positive
+    alpha: 3
+    # max cond must be positive. If it is too small, it is unlikely that a valid matrix could be generated.
+    max_condition_number: 4
+    class_prior_seed: 4
+  approaches:
+  # options: ['ddfa', 'ddfa_scan']. If DDFA_SCAN is selected, the SCAN baseline will also be computed.
+  - 'ddfa'
+  - 'ddfa_scan'
+- dataset_settings:
+    dataset: 'cifar10'
+    dataset_split_seed: 25
+  class_prior_generation:
+    # domains must be at least the number of classes
+    domains: 15
+    # alpha must be positive
+    alpha: 10
+    # max cond must be positive. If it is too small, it is unlikely that a valid matrix could be generated.
+    max_condition_number: 8
+    class_prior_seed: 23
+  approaches:
+  # options: ['ddfa', 'ddfa_scan']. If DDFA_SCAN is selected, the SCAN baseline will also be computed.
+  - 'ddfa'
+  - 'ddfa_scan'
+
+# In our paper, we conducted experiments using the following setups:
+# cifar10: 
+#     Domain counts: [10,15,20,25]
+#     Pairs of (alpha, max_condition_number): [(0.5, 4), (3, 4), (10, 8)]
+#     Approaches: ['ddfa', 'ddfa_scan']
+# cifar20: 
+#     Domain counts: [20,25,30]
+#     Pairs of (alpha, max_condition_number): [(0.5, 8), (3, 12), (10, 20)]
+#     Approaches: ['ddfa', 'ddfa_scan']
+# imagenet: 
+#     Domain counts: [50,60]
+#     Pairs of (alpha, max_condition_number): [(0.5, 200), (3, 205), (10, 210)]
+#     Approaches: ['ddfa_scan']
+# fg2: 
+#     Domain counts: [2, 3, 5, 7, 10]
+#     Pairs of (alpha, max_condition_number): [(0.5, 3), (3, 5), (10, 7)]
+#     Approaches: ['ddfa_scan']
+# fg28:
+#     Domain counts: [28, 37, 42, 47]
+#     Pairs of (alpha, max_condition_number): [(0.5, 12), (3, 20), (10, 28)]
+#     Approaches: ['ddfa_scan']
