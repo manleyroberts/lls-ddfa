@@ -47,7 +47,7 @@ for experiment in experiment_config['experiments']:
         dummy_dataset_instance = CIFAR10(data_root=dataset_root, batch_size=32, dataset_seed=42)
         dataset_class = CIFAR10
 
-        scan_ddfa_epochs        = 2
+        scan_ddfa_epochs        = 25
         scan_ddfa_loadpath      = './pretrain/scan_cifar_pretrain/scan_cifar-10.pth.tar'
         scan_ddfa_subclass_name = scan_scan
         baseline_scan_name      = scan_ddfa_loadpath
