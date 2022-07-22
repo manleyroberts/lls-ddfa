@@ -3,15 +3,15 @@ import numpy as np
 import torch
 from sklearn.utils import shuffle
 
-from class_prior import *
-from class_prior_estimation import *
-from clustering import *
-from dataset import *
-from experiment_utils import *
-from domain_discriminator.domain_discriminator import *
-from domain_discriminator.domain_discriminator_interface import *
-from domain_discriminator.domain_discriminator_scan import *
-from permutation_solver import *
+from .class_prior import *
+from .class_prior_estimation import *
+from .clustering import *
+from .dataset import *
+from .experiment_utils import *
+from .domain_discriminator.domain_discriminator import *
+from .domain_discriminator.domain_discriminator_interface import *
+from .domain_discriminator.domain_discriminator_scan import *
+from .permutation_solver import *
 
 class ExperimentSetup:
     def __init__(self, dataset, domain_class_prior_matrix, domain_discriminator, class_prior_estimator, permutation_solver, device, batch_size):
@@ -49,11 +49,11 @@ class ExperimentSetup:
         valid_labels_only = self.valid_labels[:,0]
         test_labels_only  = self.test_labels[:,0]
 
-        self.domain_discriminator.fit_discriminator(self.train_data, self.valid_data, train_domains, valid_domains, train_labels_only, valid_labels_only)
+        self.domain_discriminator.fit_discriminator(self.train_data, self.valid_data, train_domains, valid_domains)
 
         # Pre-compute best possible acc, if it's available
         if hasattr(self.domain_discriminator, 'baseline_acc'):
-            scan_alone_test_acc, scan_alone_reconstruction_error_L1, scan_reconstructed_p_y_given_d = self.domain_discriminator.baseline_acc(self.test_data, test_labels_only, test_domains, self.domain_class_prior_matrix.class_priors.T)
+            self.scan_alone_test_acc, self.scan_alone_reconstruction_error_L1, self.scan_reconstructed_p_y_given_d = self.domain_discriminator.baseline_acc(self.test_data, test_labels_only, test_domains, self.domain_class_prior_matrix.class_priors.T)
 
         # Valid for clustering
         cluster_features_train = self.domain_discriminator.get_features(
@@ -87,14 +87,14 @@ class ExperimentSetup:
         _, p_y_x = y_predictions_dd_uniform(p_d_x, p_y_d)
         # domain adjusted
         solved_dd_test_labels, p_y_x_d = y_predictions_dd_balanced(p_y_d, p_y_x, test_domains)
-        permuted_labels = self.permutation_solver.get_best_permutation(solved_dd_test_labels, test_labels_only.cpu().numpy())
-        self.test_post_cluster_acc = label_accuracy(permuted_labels, test_labels_only.cpu().numpy())
+        self.permuted_labels = self.permutation_solver.get_best_permutation(solved_dd_test_labels, test_labels_only.cpu().numpy())
+        self.test_post_cluster_acc = label_accuracy(self.permuted_labels, test_labels_only.cpu().numpy())
 
-        predicted_class_prior = np.zeros_like(self.clusterer.p_y_given_d)
+        predicted_class_prior = np.zeros_like(self.class_prior_estimator.p_y_given_d)
         permuted_p_y_x_d = np.zeros_like(p_y_x_d)
         best_class_ordering = self.permutation_solver.best_class_ordering                
         for class_label, new_class_label in enumerate(best_class_ordering):
-            predicted_class_prior[new_class_label,:] = self.clusterer.p_y_given_d[class_label,:]
+            predicted_class_prior[new_class_label,:] = self.class_prior_estimator.p_y_given_d[class_label,:]
             permuted_p_y_x_d[:, new_class_label] = p_y_x_d[:, class_label]
 
         reconstruction_error_L1_balanced = np.sum(abs(self.domain_class_prior_matrix.class_priors.T - predicted_class_prior))

@@ -1,7 +1,7 @@
 import numpy as np
 from faiss import Kmeans
 
-from experiment_utils import *
+from .experiment_utils import *
 
 class ClusterModel:
     def train_cluster(self, n_classes, n_domains, input_data, input_domains):

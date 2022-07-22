@@ -4,7 +4,7 @@ import numpy as np
 import torchvision
 from torchvision import transforms
 
-from experiment_utils import *
+from .experiment_utils import *
 
 """
 Author: Wouter Van Gansbeke, Simon Vandenhende

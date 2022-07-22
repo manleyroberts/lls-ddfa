@@ -8,12 +8,10 @@ import torch
 from torch import nn
 
 import numpy as np
-import wandb
-from models.resnet import BasicBlockWithDropout, ResNet
 
-from domain_discriminator_interface import *
-
-from experiment_utils import *
+from .models.resnet import BasicBlockWithDropout, ResNet
+from .domain_discriminator_interface import *
+from ..experiment_utils import *
 
 
 class VanillaDomainDiscriminatorModel(DomainDiscriminator):
@@ -40,8 +38,7 @@ class VanillaDomainDiscriminatorModel(DomainDiscriminator):
             'n_epochs': self.epochs,
             'lr': self.lr,
             'gamma': self.gamma,
-            'batch_size': self.batch_size,
-            'final_task_epoch_interval': self.epoch_interval_to_compute_final_task,
+            'batch_size': self.batch_size
         }
 
     def fit_discriminator(self, train_data, valid_data, train_domains, valid_domains):
@@ -124,15 +121,16 @@ class VanillaDomainDiscriminatorModel(DomainDiscriminator):
                 best_model = copy.deepcopy(self.model)
                 best_valid_loss = valid_loss
                 
-            wandb.log({
+            log_dict = {
                 'train_domain_discriminator_accuracy': train_acc,
                 'train_domain_discriminator_loss':     train_loss,
                 'valid_domain_discriminator_accuracy': valid_acc,
                 'valid_domain_discriminator_loss':    valid_loss,
                 'epoch': epoch,
                 'best_epoch': best_epoch
-            })
+            }
 
+            print(log_dict)
 
             scheduler.step()
 

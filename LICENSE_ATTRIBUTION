@@ -1,4 +1,4 @@
-Certain code within ./models/ directory
+Certain code within ./ddfa/components/domain_discriminator/models/ directory
 is modified from Pytorch-CIFAR by
 Kuang Liu (https://github.com/kuangliu/pytorch-cifar). License below.
 
@@ -29,7 +29,7 @@ SOFTWARE.
 ===========================================================================
 
 Certain code within ./ddfa/components/dataset.py, as well as ./ddfa/components/
-domain_discriminator/scan_model_definitions.py, and ./models/resnet.py,
+domain_discriminator/scan_model_definitions.py, and ./ddfa/components/domain_discriminator/models/resnet.py,
 is copied and modified from "SCAN: Learning to Classify Images without Labels"
 by Wouter Van Gansbeke, Simon Vandenhende, Stamatios Georgoulis, Marc Proesmans and Luc Van Gool.
 

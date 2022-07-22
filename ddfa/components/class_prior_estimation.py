@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.decomposition import NMF
 
-from clustering import *
+from .clustering import *
 
 class ClassPriorEstimationTechnique:
     def get_hyperparameter_dict(self):

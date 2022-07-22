@@ -4,7 +4,7 @@ Implementation: Pranav Mani, Manley Roberts
 
 import numpy as np
 from scipy.optimize import linear_sum_assignment
-from experiment_utils import *
+from .experiment_utils import *
 
 class PermutationSolver:
 

@@ -9,13 +9,12 @@ from torch import nn
 import torchvision
 
 import numpy as np
-import wandb
 
-from models.resnet import  *
-from scan_model_definitions import *
-from domain_discriminator_interface import *
+from .models.resnet import  *
+from .scan_model_definitions import *
+from .domain_discriminator_interface import *
 
-from experiment_utils import *
+from ..experiment_utils import *
 
 class DomainDiscriminatorSCAN(DomainDiscriminator):
     
@@ -159,17 +158,16 @@ class DomainDiscriminatorSCAN(DomainDiscriminator):
                 best_model = copy.deepcopy(self.model)
                 best_valid_loss = valid_loss
             
-            wandb.log({
+            log_dict = {
                 'epoch':                                epoch,
                 'train_domain_discriminator_accuracy':  train_acc,
                 'train_domain_discriminator_loss':      train_loss,
                 'valid_domain_discriminator_accuracy':  valid_acc,
                 'valid_domain_discriminator_loss':      valid_loss,
                 'best_epoch':                           best_epoch,
-                'scan_alone_test_acc':                  scan_alone_test_acc,
-                'scan_alone_reconstruction_error_L1':   scan_alone_reconstruction_error_L1,
-                'scan_reconstructed_p_y_given_d':       scan_reconstructed_p_y_given_d
-            })
+            }
+
+            print(log_dict)
 
         # Preserve best model on test dataset
         self.model = best_model
@@ -250,13 +248,13 @@ class scan_scan(DomainDiscriminatorSCAN):
         state_dict = torch.load(load_path)
         if 'model' in state_dict:
             state_dict = state_dict['model']
+        model.load_state_dict(state_dict, strict=False)
+        # model_dict = model.state_dict()
 
-        model_dict = model.state_dict()
-
-        # Fiter out unneccessary keys
-        filtered_dict = {k: v for k, v in state_dict.items() if k in model_dict and v.shape == model_dict[k].shape}
-        model_dict.update(filtered_dict)
-        model.load_state_dict(model_dict)
+        # # Fiter out unneccessary keys
+        # filtered_dict = {k: v for k, v in state_dict.items() if k in model_dict and v.shape == model_dict[k].shape}
+        # model_dict.update(filtered_dict)
+        # model.load_state_dict(model_dict)
 
         scan_alone_test_acc, p_y_d_err, scan_p_y_d  = model_evaluate(model, test_data, true_p_y_d, self.eval_ps, self.device)
 

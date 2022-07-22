@@ -1,11 +1,14 @@
 import os
 
 import argparse
-from pyparsing import alphanums
 import yaml
 
+
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
+
 parser = argparse.ArgumentParser(description='Pass exactly one argument: the path to the experiment config yaml file.')
-parser.add_argument('--dataset_config_path', type=str, default='dataset_config.yml',
+parser.add_argument('--dataset_config_path', type=str, default='experiment_config.yml',
                     help='The path to the experiment config yaml file')
 args = parser.parse_args()
 
@@ -15,7 +18,7 @@ with open(args.dataset_config_path) as f:
 os.environ["CUDA_VISIBLE_DEVICES"]=str(experiment_config['gpu'])    
 
 import torch
-import wandb
+
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 print('Using device: ', device)
 
@@ -41,10 +44,10 @@ for experiment in experiment_config['experiments']:
     use_scan        = 'ddfa_scan'   in experiment['approaches']
 
     if dataset_choice == 'cifar10':
-        dummy_dataset_instance = CIFAR10(42)
+        dummy_dataset_instance = CIFAR10(data_root=dataset_root, batch_size=32, dataset_seed=42)
         dataset_class = CIFAR10
 
-        scan_ddfa_epochs        = 25
+        scan_ddfa_epochs        = 2
         scan_ddfa_loadpath      = './pretrain/scan_cifar_pretrain/scan_cifar-10.pth.tar'
         scan_ddfa_subclass_name = scan_scan
         baseline_scan_name      = scan_ddfa_loadpath
@@ -53,7 +56,7 @@ for experiment in experiment_config['experiments']:
         ddfa_n_discretization   = 30
 
     elif dataset_choice == 'cifar3':
-        dummy_dataset_instance = CIFAR3(42)
+        dummy_dataset_instance = CIFAR3(data_root=dataset_root, batch_size=32, dataset_seed=42)
         dataset_class = CIFAR3
 
         scan_ddfa_epochs        = 20
@@ -66,7 +69,7 @@ for experiment in experiment_config['experiments']:
         ddfa_n_discretization   = 10
 
     elif dataset_choice == 'cifar20':
-        dummy_dataset_instance = CIFAR20(42)
+        dummy_dataset_instance = CIFAR20(data_root=dataset_root, batch_size=32, dataset_seed=42)
         dataset_class = CIFAR20
 
         scan_ddfa_epochs        = 25
@@ -79,7 +82,7 @@ for experiment in experiment_config['experiments']:
         ddfa_n_discretization   = 60
 
     elif dataset_choice == 'imagenet':
-        dummy_dataset_instance = ImageNet50(42)
+        dummy_dataset_instance = ImageNet50(data_root=dataset_root, batch_size=32, dataset_seed=42)
         dataset_class = ImageNet50
 
         scan_ddfa_epochs        = 25
@@ -89,7 +92,7 @@ for experiment in experiment_config['experiments']:
         baseline_scan_name      = scan_ddfa_loadpath
 
     elif dataset_choice == 'fg2':
-        dummy_dataset_instance = FieldGuide2(42)
+        dummy_dataset_instance = FieldGuide2(data_root=dataset_root, batch_size=32, dataset_seed=42)
         dataset_class = FieldGuide2
 
         scan_ddfa_epochs        = 30
@@ -103,7 +106,7 @@ for experiment in experiment_config['experiments']:
         ddfa_n_discretization   = 10
 
     elif dataset_choice == 'fg28':
-        dummy_dataset_instance = FieldGuide28(42)
+        dummy_dataset_instance = FieldGuide28(data_root=dataset_root, batch_size=32, dataset_seed=42)
         dataset_class = FieldGuide28
 
         scan_ddfa_epochs        = 60
@@ -117,111 +120,117 @@ for experiment in experiment_config['experiments']:
 
 
 
-        runs = []
+    runs = []
 
-        class_prior = RandomDomainClassPriorMatrix(
-            n_classes = dummy_dataset_instance.n_classes, 
-            n_domains = domains, 
-            max_condition_number = max_cond_number, 
-            random_seed = class_prior_seed, 
-            class_prior_alpha = alpha, 
-            min_train_num = dummy_dataset_instance.min_train_num,
-            min_test_num = dummy_dataset_instance.min_test_num, 
-            min_valid_num = dummy_dataset_instance.min_valid_num
-        )
-        
-        dataset_instance = dataset_class(dataset_seed=dataset_seed)
-
-        if use_scan:
-            # Add scan main run 
-            runs.append({
-                'n_domains': domains,
-                'class_prior': class_prior,
-                'class_prior_estimator': ClusterNMFClassPriorEstimation(
-                    base_cluster_model = ClusterModelFaissKMeans(use_gpu=False),
-                    n_discretization = dummy_dataset_instance.n_classes,
-                ),
-                'dataset': dataset_instance,
-                'permutation_solver': ScipyOptimizeLinearSumPermutationSolver(),
-                'discriminator': scan_ddfa_subclass_name(
-                        device,
-                        lr = 0.00001,
-                        exp_lr_gamma = 0.97,
-                        epochs = scan_ddfa_epochs,
-                        batch_size = 32,
-                        n_classes= class_prior.n_classes,
-                        n_domains = domains,
-                        load_path= scan_ddfa_loadpath,                    
-                        eval_ps = ScipyOptimizeLinearSumPermutationSolver(),
-                        class_prior = class_prior,
-                        epoch_interval_to_compute_final_task=100,
-                        dropout = 0,
-                        limit_gradient_flow=False,
-                        use_scheduler = 'ExponentialLR',
-                        baseline_load_path=baseline_scan_name
-                ),
-                'alpha': alpha
-            })
-
-
-        if use_raw_ddfa:        
-            # Add Domain Discriminator run
-            runs.append({
-                'n_domains': domains,
-                'class_prior': class_prior,
-                'class_prior_estimator': ClusterNMFClassPriorEstimation(
-                    base_cluster_model = ClusterModelFaissKMeans(use_gpu=False),
-                    n_discretization = ddfa_n_discretization,
-                ),
-                'dataset': dataset_instance,
-                'permutation_solver': ScipyOptimizeLinearSumPermutationSolver(),
-                'discriminator': CIFAR10PytorchCifar(
-                # 'extractor': CIFAR10PytorchCifar(
-                    device = device,
-                    lr = 0.001,
-                    exp_lr_gamma = 0.97,
-
-                    epochs = ddfa_epochs,
-
-                    batch_size = 32,
-                    n_classes = class_prior.n_classes,
-                    n_domains = domains,
-                    eval_ps = ScipyOptimizeLinearSumPermutationSolver(),
-                    class_prior = class_prior
-                ),
-            })
-
-        for r in runs:
-
-            n_domains               = r['n_domains']
-            class_prior             = r['class_prior']
-            class_prior_estimator   = r['class_prior_estimator']
-            permutation_solver      = r['permutation_solver']
-            discriminator           = r['discriminator']
-            dataset_instance        = r['dataset']
-
-            config = {
-                component_name : component.get_hyperparameter_dict()
-                for component_name, component in [
-                    ('dataset', dataset_instance),
-                    ('class_prior', class_prior),
-                    ('class_prior_estimator', class_prior_estimator),
-                    ('permutation_solver', permutation_solver),
-                    ('discriminator', discriminator)
-                ]
-            }
-
-            run = wandb.init(
-                entity="latent-label-shift-2022",
-                project="latent-label-shift-2022-final",
-                reinit=True,
-                config=config
-            )
-
-            experiment = ExperimentSetup(dataset_instance, class_prior, discriminator, class_prior_estimator, permutation_solver, device, batch_size=32)
-
-            wandb.config.update({"final_best_labels": list(experiment.permuted_labels)})
-            wandb.config.update({'test_post_cluster_acc': experiment.test_post_cluster_acc})
-            wandb.config.update({'test_post_cluster_p_y_given_d_l1_norm': experiment.test_post_cluster_p_y_given_d_l1_norm})
+    class_prior = RandomDomainClassPriorMatrix(
+        n_classes = dummy_dataset_instance.n_classes, 
+        n_domains = domains, 
+        max_condition_number = max_cond_number, 
+        random_seed = class_prior_seed, 
+        class_prior_alpha = alpha, 
+        min_train_num = dummy_dataset_instance.min_train_num,
+        min_test_num = dummy_dataset_instance.min_test_num, 
+        min_valid_num = dummy_dataset_instance.min_valid_num
+    )
     
-            run.finish()
+    dataset_instance = dataset_class(data_root=dataset_root, batch_size=32, dataset_seed=dataset_seed)
+
+    if use_scan:
+        # Add scan main run 
+        runs.append({
+            'n_domains': domains,
+            'class_prior': class_prior,
+            'class_prior_estimator': ClusterNMFClassPriorEstimation(
+                base_cluster_model = ClusterModelFaissKMeans(use_gpu=False),
+                n_discretization = dummy_dataset_instance.n_classes,
+            ),
+            'dataset': dataset_instance,
+            'permutation_solver': ScipyOptimizeLinearSumPermutationSolver(),
+            'discriminator': scan_ddfa_subclass_name(
+                    device,
+                    lr = 0.00001,
+                    exp_lr_gamma = 0.97,
+                    epochs = scan_ddfa_epochs,
+                    batch_size = 32,
+                    n_classes= class_prior.n_classes,
+                    n_domains = domains,
+                    load_path= scan_ddfa_loadpath,                    
+                    eval_ps = ScipyOptimizeLinearSumPermutationSolver(),
+                    class_prior = class_prior,
+                    dropout = 0,
+                    limit_gradient_flow=False,
+                    use_scheduler = 'ExponentialLR',
+                    baseline_load_path=baseline_scan_name
+            ),
+            'alpha': alpha
+        })
+
+
+    if use_raw_ddfa:        
+        # Add Domain Discriminator run
+        runs.append({
+            'n_domains': domains,
+            'class_prior': class_prior,
+            'class_prior_estimator': ClusterNMFClassPriorEstimation(
+                base_cluster_model = ClusterModelFaissKMeans(use_gpu=False),
+                n_discretization = ddfa_n_discretization,
+            ),
+            'dataset': dataset_instance,
+            'permutation_solver': ScipyOptimizeLinearSumPermutationSolver(),
+            'discriminator': CIFAR10PytorchCifar(
+            # 'extractor': CIFAR10PytorchCifar(
+                device = device,
+                lr = 0.001,
+                exp_lr_gamma = 0.97,
+
+                epochs = ddfa_epochs,
+
+                batch_size = 32,
+                n_classes = class_prior.n_classes,
+                n_domains = domains,
+                eval_ps = ScipyOptimizeLinearSumPermutationSolver(),
+                class_prior = class_prior
+            ),
+        })
+
+    for r in runs:
+
+        n_domains               = r['n_domains']
+        class_prior             = r['class_prior']
+        class_prior_estimator   = r['class_prior_estimator']
+        permutation_solver      = r['permutation_solver']
+        discriminator           = r['discriminator']
+        dataset_instance        = r['dataset']
+
+        config = {
+            component_name : component.get_hyperparameter_dict()
+            for component_name, component in [
+                ('dataset', dataset_instance),
+                ('class_prior', class_prior),
+                ('class_prior_estimator', class_prior_estimator),
+                ('permutation_solver', permutation_solver),
+                ('discriminator', discriminator)
+            ]
+        }
+
+        experiment = ExperimentSetup(dataset_instance, class_prior, discriminator, class_prior_estimator, permutation_solver, device, batch_size=32)
+
+        result_dict = {
+            "final_best_labels": list(experiment.permuted_labels),
+            'test_post_cluster_acc': experiment.test_post_cluster_acc,
+            'test_post_cluster_p_y_given_d_l1_norm': experiment.test_post_cluster_p_y_given_d_l1_norm
+        }
+
+        if hasattr(experiment, 'scan_alone_test_acc'):
+            result_dict.update({'scan_alone_best_acc': experiment.scan_alone_test_acc})
+        if hasattr(experiment, 'scan_alone_reconstruction_error_L1'):
+            result_dict.update({'scan_alone_reconstruction_error_L1': experiment.scan_alone_reconstruction_error_L1})
+        if hasattr(experiment, 'scan_reconstructed_p_y_given_d'):
+            result_dict.update({'scan_reconstructed_p_y_given_d': experiment.scan_reconstructed_p_y_given_d})
+
+        run_summary_dict = {
+            'config': config,
+            'result_dict': result_dict
+        }
+
+        print(run_summary_dict)
