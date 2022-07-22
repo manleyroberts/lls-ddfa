@@ -45,7 +45,7 @@ for experiment in experiment_config['experiments']:
         dataset_class = CIFAR10
 
         scan_ddfa_epochs        = 25
-        scan_ddfa_loadpath      = 'scan_cifar-10.pth.tar'
+        scan_ddfa_loadpath      = './pretrain/scan_cifar_pretrain/scan_cifar-10.pth.tar'
         scan_ddfa_subclass_name = scan_scan
         baseline_scan_name      = scan_ddfa_loadpath
 
@@ -57,7 +57,7 @@ for experiment in experiment_config['experiments']:
         dataset_class = CIFAR3
 
         scan_ddfa_epochs        = 20
-        scan_ddfa_loadpath      = 'scan_cifar-10.pth.tar'
+        scan_ddfa_loadpath      = './pretrain/scan_cifar_pretrain/scan_cifar-10.pth.tar'
         scan_ddfa_subclass_name = scan_scan
 
         baseline_scan_name      = scan_ddfa_loadpath
@@ -70,7 +70,7 @@ for experiment in experiment_config['experiments']:
         dataset_class = CIFAR20
 
         scan_ddfa_epochs        = 25
-        scan_ddfa_loadpath      = 'scan_cifar-20.pth.tar'
+        scan_ddfa_loadpath      = './pretrain/scan_cifar_pretrain/scan_cifar-20.pth.tar'
         scan_ddfa_subclass_name = scan_scan
 
         baseline_scan_name      = scan_ddfa_loadpath
@@ -83,7 +83,7 @@ for experiment in experiment_config['experiments']:
         dataset_class = ImageNet50
 
         scan_ddfa_epochs        = 25
-        scan_ddfa_loadpath      = 'scan_imagenet_50.pth.tar'
+        scan_ddfa_loadpath      = './pretrain/scan_imagenet_pretrain/scan_imagenet_50.pth.tar'
         scan_ddfa_subclass_name = scan_scan_imagenet
 
         baseline_scan_name      = scan_ddfa_loadpath
@@ -93,11 +93,11 @@ for experiment in experiment_config['experiments']:
         dataset_class = FieldGuide2
 
         scan_ddfa_epochs        = 30
-        scan_ddfa_loadpath      = './scan_fieldguide_run/fieldguide2/pretext/model.pth.tar'
+        scan_ddfa_loadpath      = './pretrain/scan_fieldguide_pretrain/fieldguide2/pretext/model.pth.tar'
         scan_ddfa_subclass_name = scan_pretext
 
         # for comparison
-        baseline_scan_name      = './scan_fieldguide_run/fieldguide2/scan/model.pth.tar'
+        baseline_scan_name      = './pretrain/scan_fieldguide_pretrain/fieldguide2/scan/model.pth.tar'
 
         ddfa_epochs             = 100
         ddfa_n_discretization   = 10
@@ -107,10 +107,10 @@ for experiment in experiment_config['experiments']:
         dataset_class = FieldGuide28
 
         scan_ddfa_epochs        = 60
-        scan_ddfa_loadpath      = './scan_fieldguide_run/fieldguide28/pretext/model.pth.tar'
+        scan_ddfa_loadpath      = './pretrain/scan_fieldguide_pretrain/fieldguide28/pretext/model.pth.tar'
         scan_ddfa_subclass_name = scan_pretext
         # for comparison
-        baseline_scan_name      = 'scan-28-model.pth.tar'
+        baseline_scan_name      = './pretrain/scan_fieldguide_pretrain/fieldguide28/scan/model.pth.tar'
 
         ddfa_epochs             = 100
         ddfa_n_discretization   = 84
