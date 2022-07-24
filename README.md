@@ -1,6 +1,8 @@
 # Unsupervised Learning under Latent Label Shift
 A new approach to unsupervised learning leveraging domain structure and invariance.
 
+![Figure 1](ddfa-graphic.png "Diagram of the DDFA procedure")
+
 ## ICML 2022 SCIS Workshop Links
 [Paper](https://openreview.net/pdf?id=CbxgFfEEP7P)
 
