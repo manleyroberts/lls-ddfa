@@ -3,8 +3,12 @@ A new approach to unsupervised learning leveraging domain structure and invarian
 
 ![Figure 1](ddfa-graphic.png "Diagram of the DDFA procedure")
 
-## ICML 2022 SCIS Workshop Links
-[Paper](https://openreview.net/pdf?id=CbxgFfEEP7P)
+## Arxiv
+
+[Paper](https://arxiv.org/abs/2207.13179) as Roberts*, Mani*, Garg, and Lipton.
+
+## ICML 2022 SCIS Workshop
+[Paper](https://openreview.net/pdf?id=CbxgFfEEP7P) as Mani*, Roberts*, Garg, and Lipton.
 
 [SlidesLive Poster Session Video](https://icml.cc/virtual/2022/workshop/13461#wse-detail-19178)
 
