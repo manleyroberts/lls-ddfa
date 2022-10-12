@@ -1,7 +1,7 @@
 # Unsupervised Learning under Latent Label Shift
 A new approach to unsupervised learning leveraging domain structure and invariance.
 
-NOTE: this is a deprecated repository. Look for all future updates at [this repo on the ACMI Lab Github](https://github.com/acmi-lab/Latent-Label-Shift-DDFA/upload/main).
+NOTE: this is a deprecated repository. Look for all future updates at [this repo on the ACMI Lab Github](https://github.com/acmi-lab/Latent-Label-Shift-DDFA).
 
 ![Figure 1](ddfa-graphic.png "Diagram of the DDFA procedure")
 
